@@ -38,10 +38,6 @@ int main()
     float angleOfIncidence;
 	float angleOfRefraction;
 	
-	// Geliþ hýzý ve gidiþ hýzý
-	float speedOfIncidence;
-	float speedOfRefraction;
-	
 	// Kýrýlma açýsýnýn sinüsü
 	float sineOfRefraction;
 	
@@ -59,7 +55,6 @@ int main()
 	string secondMedia;
 	
 	std::map<std::string, float> indicesOfMedias;
-	// std::map<std::string, float> lightSpeedOnMedias;
 	
 	// Bazý ortamlarýn kýrýlma indisleri
 	indicesOfMedias[VACUUM] = 1;
@@ -67,14 +62,6 @@ int main()
 	indicesOfMedias[SAPPHIRE] = 1.77;
 	indicesOfMedias[OLIVEOIL] = 1.47;
 	indicesOfMedias[DIAMOND] = 2.417;
-	
-	/* Bazý ortamlarda ýþýðýn hýzý
-	lightSpeedOnMedias[VACUUM] = 300;
-	lightSpeedOnMedias[WATER] = 225.056;
-	lightSpeedOnMedias[SAPPHIRE] = 169.492;
-	lightSpeedOnMedias[OLIVEOIL] = 204.082;
-	lightSpeedOnMedias[DIAMOND] = 124.121;
-	*/
 	
 	// Deðer atama bölümü
 	
@@ -89,8 +76,7 @@ int main()
 	
 	angleOfIncidence = 55;
 	angleOfRefraction = radianToAngle( asin( (n1 / n2) * sin(angleToRadian(angleOfIncidence)) ) );
-	
-	// Asal ve normal eksenleri
+
 	sf::RectangleShape principalAxis, normal, incidentRay, refractedRay, reflectedRay;
 	sf::RectangleShape bcUp, bcDown;
 	
@@ -147,26 +133,26 @@ int main()
 	
 	f_media.setFont(font);
 	f_media.setCharacterSize(50);
-	f_media.setPosition(sf::Vector2f(50.f,400.f));
+	f_media.setPosition(sf::Vector2f(50.f,100.f));
 	f_media.setString(firstMedia);
 	f_media.setFillColor(sf::Color::Black);	
 	
 	s_media.setFont(font);
 	s_media.setCharacterSize(50);
-	s_media.setPosition(sf::Vector2f(50.f,600.f));
+	s_media.setPosition(sf::Vector2f(50.f,400.f));
 	s_media.setString(secondMedia);	
 	s_media.setFillColor(sf::Color::Black);	
 	
 	n1_t.setFont(font);
 	n1_t.setCharacterSize(30);
 	// n1_t.setPosition(sf::Vector2f(25.f, 15.f));
-	n1_t.setPosition(sf::Vector2f(75.f, 400.f + 75.f));
+	n1_t.setPosition(sf::Vector2f(75.f, 200.f));
 	n1_t.setFillColor(sf::Color::Black);	
 	
 	n2_t.setFont(font);
 	n2_t.setCharacterSize(30);
 	// n2_t.setPosition(sf::Vector2f(25.f, 65.f));
-	n2_t.setPosition(sf::Vector2f(75.f, 600.f + 75.f));
+	n2_t.setPosition(sf::Vector2f(75.f, 500.f));
 	n2_t.setFillColor(sf::Color::Black);
 	
 	critAngle_t.setFont(font);
@@ -190,10 +176,10 @@ int main()
     {
         sf::Event event;
         while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-                
+        {  
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+    			window.close();	
+		 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				
@@ -290,13 +276,13 @@ int main()
 			n2 = indicesOfMedias[DIAMOND];
 		}	
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && angleOfIncidence < 90)
 		{
     		incidentRay.rotate(-1);
     		angleOfIncidence++;
 		}
 		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && angleOfIncidence > 0)
 		{
     		incidentRay.rotate(1);
     		angleOfIncidence--;	
@@ -322,7 +308,11 @@ int main()
 			critAngle = radianToAngle( asin( (n2 / n1) ) );
 			
 			reflectedRay.setRotation(angleOfIncidence);
-			refractedRay.setRotation(-angleOfRefraction);
+			
+			if(int(angleOfIncidence) == int(critAngle))
+				refractedRay.setRotation(-90);
+			else	
+				refractedRay.setRotation(-angleOfRefraction);	
 			
 			if(sineOfRefraction > 1) 
 			{
@@ -347,11 +337,6 @@ int main()
 		n2_t.setString("n2 = " + to_string(n2));
 		
 		critAngle_t.setString("Kritik açý = " + to_string(int(critAngle)) + "°");
-		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-		{
-    		window.close();	
-		}
 
         window.clear();
         window.draw(bcUp);
@@ -360,11 +345,11 @@ int main()
         window.draw(normal);
         window.draw(incidentRay);
         
-        if(!(sineOfRefraction > 1 && n1 > n2)) 
-        	window.draw(refractedRay);
-        else {}
-        	 
-        window.draw(reflectedRay);
+        window.draw(refractedRay);
+			
+		if(n1 > n2 && !(int(angleOfIncidence) == int(critAngle)))	 
+        	window.draw(reflectedRay);
+        
         window.draw(angleOfIncidence_t);
         window.draw(angleOfRefraction_t);
         window.draw(f_media);
@@ -376,8 +361,9 @@ int main()
         if(n1 > n2)
         	window.draw(critAngle_t);
         
+        
         window.display();
     }
 
     return 0;
-}					
+}	
