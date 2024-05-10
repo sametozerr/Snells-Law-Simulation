@@ -4,6 +4,7 @@
 #include <string> 
 
 #define PI 3.14
+#define numberOfMedias 5	
 
 using namespace std;
  
@@ -18,12 +19,21 @@ enum Medias
 
 inline Medias operator++ (Medias & media) 
 {	
-    media = static_cast<Medias>((static_cast<int>(d) + 1) % 7);
+	if(int(media) < numberOfMedias)
+    	media = static_cast<Medias>((static_cast<int>(media) + 1) % numberOfMedias);	
 }
 
-float getRefractiveIndex(Medias media) 
+inline Medias operator-- (Medias & media) 
+{	
+	if(int(media) > 0)
+    	media = static_cast<Medias>((static_cast<int>(media) - 1));
+    else 
+	    media = static_cast<Medias>(static_cast<int>(numberOfMedias - 1));	
+}
+
+float getRefractiveIndex(Medias * media) 
 {
-	switch(media)
+	switch(*media)
 	{
 		case 0: return 1.00f; break;
 		             
@@ -39,9 +49,10 @@ float getRefractiveIndex(Medias media)
 	}
 }
 
-string getNameOfTheMedia(Medias media) 
+string getNameOfTheMedia(Medias * media) 
 {
-	switch(media)
+	
+	switch(*media)
 	{
 		case 0: return "Air"; break;
 		             
@@ -55,6 +66,25 @@ string getNameOfTheMedia(Medias media)
 	    		
 	    default: 			 break;
 	}	
+}
+
+sf::Color getBcColor(Medias * media) 
+{
+	switch(*media)
+	{
+		case 0: return sf::Color(15,94,156); break;
+		             
+	    case 1: return sf::Color(153,217,255); break;
+		
+	    case 2: return sf::Color(15,82,186); break;
+		
+	    case 3: return sf::Color(95,114,15); break;
+		
+	    case 4: return sf::Color(154,197,219); break;		
+	    		
+	    default: 			 break;
+	}
+		
 }
 
 double angleToRadian(float angle) { return (angle * PI) / 180; }
@@ -80,13 +110,11 @@ int main()
 	// Kritik açý
     float critAngle;
 	
-	Medias fMedia = Medias::Water;
-	Medias sMedia = Medias::Air;
+	Medias fMedia = Medias::Air;
+	Medias sMedia = Medias::Water;
 	
-	n1 = getRefractiveIndex(fMedia);
-	n2 = getRefractiveIndex(sMedia);
-	
-	++fMedia;
+	n1 = getRefractiveIndex(&fMedia);
+	n2 = getRefractiveIndex(&sMedia);
 	
 	angleOfIncidence = 55;
 	angleOfRefraction = radianToAngle( asin( (n1 / n2) * sin(angleToRadian(angleOfIncidence)) ) );
@@ -148,13 +176,13 @@ int main()
 	f_media.setFont(font);
 	f_media.setCharacterSize(50);
 	f_media.setPosition(sf::Vector2f(50.f,100.f));
-	f_media.setString(getNameOfTheMedia(fMedia));
+	f_media.setString(getNameOfTheMedia(&fMedia));
 	f_media.setFillColor(sf::Color::Black);	
 	
 	s_media.setFont(font);
 	s_media.setCharacterSize(50);
 	s_media.setPosition(sf::Vector2f(50.f,400.f));
-	s_media.setString(getNameOfTheMedia(sMedia));	
+	s_media.setString(getNameOfTheMedia(&sMedia));	
 	s_media.setFillColor(sf::Color::Black);	
 	
 	n1_t.setFont(font);
@@ -195,101 +223,53 @@ int main()
     			window.close();	
 		 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-			{
-				
- 				if(sf::Mouse::getPosition(window).y < 530) 
+			{	
+ 				if(sf::Mouse::getPosition(window).y < window.getSize().y / 2) 
 				{
-					if(int(fMedia) < 4) 
-			 			changeMedia(fMedia);
-					else
-						fCurrentMedia = 0;	 	
+					
+					std::cout << "Clicked left";
+					
+				 	--fMedia;
+				 	
+				 	n1 = getRefractiveIndex(&fMedia);
+				 	f_media.setString(getNameOfTheMedia(&fMedia));	
+				 	bcUp.setFillColor(getBcColor(&fMedia));	
+				 	
 				}
-				
+			 				 		
 				else 
 				{
-					if(sCurrentMedia < 4)
-			 			sCurrentMedia++;
-					else
-						sCurrentMedia = 0;	
+					--sMedia;
+					
+					n2 = getRefractiveIndex(&sMedia);
+				 	s_media.setString(getNameOfTheMedia(&sMedia));	
+				 	bcDown.setFillColor(getBcColor(&sMedia));	
 				}
-				
-			}   
+			 		
+			} 
+			
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+			{	
+ 				if(sf::Mouse::getPosition(window).y < window.getSize().y / 2) 
+				{
+					++fMedia;
+					
+					n1 = getRefractiveIndex(&fMedia);
+				 	f_media.setString(getNameOfTheMedia(&fMedia));	
+				 	bcUp.setFillColor(getBcColor(&fMedia));	
+				}
+			 				 	
+				else 
+				{
+					++sMedia;
+					
+					n2 = getRefractiveIndex(&sMedia);
+				 	s_media.setString(getNameOfTheMedia(&sMedia));	
+				 	bcDown.setFillColor(getBcColor(&sMedia));	
+				}		
+			}
+			  
         }
-		
-		
-        if(medias[fCurrentMedia] == VACUUM) 
-		{
-			bcUp.setFillColor(sf::Color(15,94,156));
-			f_media.setString(VACUUM);
-			n1 = indicesOfMedias[VACUUM];	
-		}
-			
-		else if(medias[fCurrentMedia] == WATER) 
-		{
-			bcUp.setFillColor(sf::Color(153,217,255));	
-			f_media.setString(WATER);	
-			n1 = indicesOfMedias[WATER];	
-		}
-			
-		else if(medias[fCurrentMedia] == SAPPHIRE) 
-		{
-			bcUp.setFillColor(sf::Color(15,82,186));
-			f_media.setString(SAPPHIRE);
-			n1 = indicesOfMedias[SAPPHIRE];			
-		}
-			
-		else if(medias[fCurrentMedia] == OLIVEOIL) 
-		{
-			bcUp.setFillColor(sf::Color(95,114,15));
-			f_media.setString(OLIVEOIL);
-			n1 = indicesOfMedias[OLIVEOIL];			
-		}
-			
-		else 
-		{
-			bcUp.setFillColor(sf::Color(154,197,219));	
-			f_media.setString(DIAMOND);	
-			n1 = indicesOfMedias[DIAMOND];	
-		}
-		
-		//////////////////////////////////////////////
-		//////////////////////////////////////////////
-		//////////////////////////////////////////////
-		
-		if(medias[sCurrentMedia] == VACUUM) 
-		{
-			bcDown.setFillColor(sf::Color(15,94,156));
-			s_media.setString(VACUUM);
-			n2 = indicesOfMedias[VACUUM];	
-		}
-			
-		else if(medias[sCurrentMedia] == WATER) 
-		{
-			bcDown.setFillColor(sf::Color(153,217,255));	
-			s_media.setString(WATER);
-			n2 = indicesOfMedias[WATER];	
-		}
-			
-		else if(medias[sCurrentMedia] == SAPPHIRE) 
-		{
-			bcDown.setFillColor(sf::Color(15,82,186));
-			s_media.setString(SAPPHIRE);	
-			n2 = indicesOfMedias[SAPPHIRE];	
-		}
-			
-		else if(medias[sCurrentMedia] == OLIVEOIL) 
-		{
-			bcDown.setFillColor(sf::Color(95,114,15));
-			s_media.setString(OLIVEOIL);
-			n2 = indicesOfMedias[OLIVEOIL];		
-		}
-			
-		else 
-		{
-			bcDown.setFillColor(sf::Color(154,197,219));	
-			s_media.setString(DIAMOND);	
-			n2 = indicesOfMedias[DIAMOND];
-		}	
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && angleOfIncidence < 90)
 		{
