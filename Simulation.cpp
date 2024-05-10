@@ -1,28 +1,64 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include <map>
 #include <math.h>
 #include <string> 
-
-#define VACUUM "Hava"
-#define WATER "Su"
-#define SAPPHIRE "Safir"
-#define OLIVEOIL "Zeytinyaðý"
-#define DIAMOND "Elmas"
 
 #define PI 3.14
 
 using namespace std;
-
-double angleToRadian(float angle) 
+ 
+enum Medias 
 {
-	return (angle * PI) / 180;
+	Air,
+	Water,
+	Sapphire,
+	Oliveoil,
+	Diamond	
+};
+
+inline Medias operator++ (Medias & media) 
+{	
+    media = static_cast<Medias>((static_cast<int>(d) + 1) % 7);
 }
 
-float radianToAngle(float rad) 
+float getRefractiveIndex(Medias media) 
 {
-	return (rad * 180) / PI;
+	switch(media)
+	{
+		case 0: return 1.00f; break;
+		             
+	    case 1: return 1.33f; break;
+		
+	    case 2: return 1.77f; break;
+		
+	    case 3: return 1.44f; break;
+		
+	    case 4: return 2.42f; break;		
+	    		
+	    default: 			 break;
+	}
 }
+
+string getNameOfTheMedia(Medias media) 
+{
+	switch(media)
+	{
+		case 0: return "Air"; break;
+		             
+	    case 1: return "Water"; break;
+		
+	    case 2: return "Sapphire"; break;
+		
+	    case 3: return "Olive oil"; break;
+		
+	    case 4: return "Diamond"; break;		
+	    		
+	    default: 			 break;
+	}	
+}
+
+double angleToRadian(float angle) { return (angle * PI) / 180; }
+float radianToAngle(float rad) { return (rad * 180) / PI;}
 
 int main()
 {
@@ -44,35 +80,13 @@ int main()
 	// Kritik açý
     float critAngle;
 	
-	int fCurrentMedia;
-	int sCurrentMedia;
+	Medias fMedia = Medias::Water;
+	Medias sMedia = Medias::Air;
 	
-	// Ortamlar
-	string medias[5] = {VACUUM, WATER, SAPPHIRE, OLIVEOIL, DIAMOND};
+	n1 = getRefractiveIndex(fMedia);
+	n2 = getRefractiveIndex(sMedia);
 	
-	// Birinci ve ikinci ortam
-	string firstMedia;
-	string secondMedia;
-	
-	std::map<std::string, float> indicesOfMedias;
-	
-	// Bazý ortamlarýn kýrýlma indisleri
-	indicesOfMedias[VACUUM] = 1;
-	indicesOfMedias[WATER] = 1.333;
-	indicesOfMedias[SAPPHIRE] = 1.77;
-	indicesOfMedias[OLIVEOIL] = 1.47;
-	indicesOfMedias[DIAMOND] = 2.417;
-	
-	// Deðer atama bölümü
-	
-	fCurrentMedia = 1;
-	sCurrentMedia = 0;
-	
-	firstMedia = medias[fCurrentMedia];
-	secondMedia = medias[sCurrentMedia];
-	
-	n1 = indicesOfMedias[medias[fCurrentMedia]];
-	n2 = indicesOfMedias[medias[sCurrentMedia]];
+	++fMedia;
 	
 	angleOfIncidence = 55;
 	angleOfRefraction = radianToAngle( asin( (n1 / n2) * sin(angleToRadian(angleOfIncidence)) ) );
@@ -134,13 +148,13 @@ int main()
 	f_media.setFont(font);
 	f_media.setCharacterSize(50);
 	f_media.setPosition(sf::Vector2f(50.f,100.f));
-	f_media.setString(firstMedia);
+	f_media.setString(getNameOfTheMedia(fMedia));
 	f_media.setFillColor(sf::Color::Black);	
 	
 	s_media.setFont(font);
 	s_media.setCharacterSize(50);
 	s_media.setPosition(sf::Vector2f(50.f,400.f));
-	s_media.setString(secondMedia);	
+	s_media.setString(getNameOfTheMedia(sMedia));	
 	s_media.setFillColor(sf::Color::Black);	
 	
 	n1_t.setFont(font);
@@ -185,20 +199,21 @@ int main()
 				
  				if(sf::Mouse::getPosition(window).y < 530) 
 				{
-					if(fCurrentMedia < 4)
-			 			fCurrentMedia++;
+					if(int(fMedia) < 4) 
+			 			changeMedia(fMedia);
 					else
 						fCurrentMedia = 0;	 	
-					}
- 				
- 					else 
-					{
+				}
+				
+				else 
+				{
 					if(sCurrentMedia < 4)
 			 			sCurrentMedia++;
 					else
-						sCurrentMedia = 0;
-					} 
-			}    
+						sCurrentMedia = 0;	
+				}
+				
+			}   
         }
 		
 		
