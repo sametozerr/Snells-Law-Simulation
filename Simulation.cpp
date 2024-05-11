@@ -111,13 +111,13 @@ int main()
     int windowSizeX = window.getSize().x;
     int windowSizeY = window.getSize().y;
 	
-	Medias fMedia = Medias::Air;
+	Medias fMedia = Medias::Oliveoil;
 	Medias sMedia = Medias::Water;
 	
 	n1 = getRefractiveIndex(&fMedia);
 	n2 = getRefractiveIndex(&sMedia);
 	
-	angleOfIncidence = 55;
+	angleOfIncidence = 67;
 	
 	angleOfRefraction = radianToAngle( asin( (n1 / n2) * sin(angleToRadian(angleOfIncidence)) ) );
 
@@ -126,11 +126,11 @@ int main()
 	
 	bcUp.setSize(sf::Vector2f( windowSizeX, windowSizeY / 2 ));
 	bcUp.setPosition(sf::Vector2f(0, 0));
-	bcUp.setFillColor(sf::Color(15,94,156));
+	bcUp.setFillColor(getBcColor(&fMedia));
 	
 	bcDown.setSize(sf::Vector2f( windowSizeX, windowSizeY / 2 ));
 	bcDown.setPosition(sf::Vector2f(0, windowSizeY / 2));
-	bcDown.setFillColor(sf::Color(153,217,255));
+	bcDown.setFillColor(getBcColor(&sMedia));
 
 	principalAxis.setSize(sf::Vector2f( windowSizeX, 10 ));
 	principalAxis.setOrigin(sf::Vector2f(0 , principalAxis.getSize().y / 2));
@@ -147,7 +147,7 @@ int main()
 	incidentRay.setRotation(-angleOfIncidence);
 	
 	refractedRay.setSize(sf::Vector2f( 5 ,normal.getSize().y / 2 + 100.f));
-	refractedRay.setOrigin(sf::Vector2f(incidentRay.getSize().x / 2, 0));
+	refractedRay.setOrigin(sf::Vector2f(refractedRay.getSize().x / 2, 0));
 	refractedRay.setPosition(sf::Vector2f(windowSizeX / 2, windowSizeY / 2));
 	refractedRay.setFillColor(sf::Color::Red);
 	refractedRay.setRotation(-angleOfRefraction);
@@ -189,13 +189,11 @@ int main()
 	
 	n1_t.setFont(font);
 	n1_t.setCharacterSize(30);
-	// n1_t.setPosition(sf::Vector2f(25.f, 15.f));
 	n1_t.setPosition(sf::Vector2f(75.f, 200.f));
 	n1_t.setFillColor(sf::Color::Black);	
 	
 	n2_t.setFont(font);
 	n2_t.setCharacterSize(30);
-	// n2_t.setPosition(sf::Vector2f(25.f, 65.f));
 	n2_t.setPosition(sf::Vector2f(75.f, 500.f));
 	n2_t.setFillColor(sf::Color::Black);
 	
@@ -302,14 +300,19 @@ int main()
 			reflectedRay.setRotation(angleOfIncidence);
 			
 			if(int(angleOfIncidence) == int(critAngle)) 
-				refractedRay.setRotation(-90);
+			{
+				angleOfRefraction = 90;
+				refractedRay.setRotation(-angleOfRefraction);	
+			}
+				
+				
 			if(int(angleOfIncidence) < int(critAngle)) 
 			{
 				reflectedRay.setFillColor(sf::Color(255, 0, 0, 150));	
 				refractedRay.setRotation(-angleOfRefraction);
 			}
 				
-			else
+			if(int(angleOfIncidence) > int(critAngle))
 			{
 				reflectedRay.setFillColor(sf::Color::Red);
 				refractedRay.setRotation(-angleOfRefraction);
@@ -322,7 +325,7 @@ int main()
 			angleOfRefraction_t.setString("Kýrýlma Açýsý = " + to_string( int(angleOfRefraction)) + "°");
 	    else 
 		{
-			if(int(angleOfIncidence) >= int(critAngle))
+			if(int(angleOfIncidence) > int(critAngle))
 				angleOfRefraction_t.setString("Yansýma açýsý = " + to_string( int(angleOfIncidence)) + "°");
 			else
 				angleOfRefraction_t.setString("Kýrýlma Açýsý = " + to_string( int(angleOfRefraction)) + "°");
@@ -341,11 +344,13 @@ int main()
         window.draw(incidentRay);
         window.draw(refractedRay);
 			
-		if(n1 > n2)	 
+		if(n1 > n2 && !(int(angleOfIncidence) == int(critAngle)))	 
 		{
 			window.draw(reflectedRay);
-			window.draw(critAngle_t);
 		}	
+		
+		if(n1 > n2) 
+ 			window.draw(critAngle_t);
         
         window.draw(angleOfIncidence_t);
         window.draw(angleOfRefraction_t);
